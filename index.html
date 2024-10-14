@@ -3,17 +3,121 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Set the name of the tab here -->
     <title>Farewell Tom</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        .message-container {
+            position: relative;
+            height: 100px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .message {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .author {
+            display: block;
+            text-align: right;
+            margin-top: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container has-text-centered">
-        <h1 class="title is-1">Farewell Tom</h1>
-    </div>
+    <section class="hero">
+        <div class="hero-body has-text-centered">
+            <div class="container">
+                <h1 class="title">Farewell Tom</h1>
+                <h2 class="subtitle">Thanks for everything you have done for us at the Hangar</h2>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="message-container" id="message-container">
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const messageTexts = [
+            {
+                message: "Thanks you for all of your help, friendship and mentorship! I appreciate everything you have done for me!",
+                from: "Colin"
+            },
+            {
+                message: "A test message",
+                from: "Holly"
+            },
+            {
+                message: "A second test message",
+                from: "Lauren"
+            },
+            {
+                message: "A final test message",
+                from: "Lewis"
+            },
+            {
+                message: "Wow, this is cool",
+                from: "Natalie"
+            },
+            {
+                message: "This is a really long message to show the variable wait time for the each message, it is roughly 50 milliseconds per character of the message, if it were any longer then it'd be boring and if it were shorter then you may not have time to read the whole thing!",
+                from: "Colin (again)"
+            },
+        ];
+
+        const messageContainer = document.getElementById('message-container');
+        const messages = document.querySelectorAll('.message');
+        let currentIndex = 0;
+
+        messageTexts.forEach((message, index) => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message' + (index === 0 ? ' active' : '');
+            messageDiv.innerHTML = `"${message.message}"<span class="author">-${message.from}</span>`;
+            messageContainer.appendChild(messageDiv);
+        });
+
+        function showNextMessage() {
+            const messages = document.querySelectorAll('.message');
+            messages[currentIndex].classList.remove('active');
+
+            currentIndex = (currentIndex + 1) % messages.length;
+            messages[currentIndex].classList.add('active');
+
+            const messageText = messages[currentIndex].childNodes[0].nodeValue.trim();
+            const charCount = messageText.length;
+
+            // Adjust wait time based on message length
+            let waitTime;
+            if (charCount <= 50) {
+                waitTime = 3000; // Minimum 3 seconds for short messages
+            } else {
+                waitTime = Math.max(3000, charCount * 50);
+            }
+
+            setTimeout(showNextMessage, waitTime);
+        }
+
+        setTimeout(showNextMessage, 4000);
+    </script>
 </body>
 
 </html>
