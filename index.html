@@ -9,7 +9,7 @@
     <style>
         .message-container {
             position: relative;
-            height: 100px;
+            height: 100vh;
             overflow: hidden;
             margin: 2rem 0;
         }
@@ -50,44 +50,52 @@
     </section>
 
     <section class="section">
-        <div class="container">
-            <div class="message-container" id="message-container">
+        <div class="columns is-mobile is-vcentered is-justify-content-center">
+            <div class="column is-narrow">
+                <img onclick="onPrevClick(this)" width="20vw" src="media/prev.svg" />
+            </div>
+            <div class="column is-narrow">
+                <img onclick="onPauseClick(this)" width="20vw" src="media/pause.svg" />
+            </div>
+            <div class="column is-narrow">
+                <img onclick="onNextClick(this)" width="20vw" src="media/next.svg" />
             </div>
         </div>
+        <div class="container">
+            <div class="message-container" id="message-container"></div>
+        </div>
+
     </section>
 
     <script>
         const messageTexts = [
             {
-                message: "Thanks you for all of your help, friendship and mentorship! I appreciate everything you have done for me!",
-                from: "Colin"
+                message: `Thanks you for all of your help, friendship and mentorship! I appreciate everything you have done for me!`,
+                from: `Colin`
             },
             {
-                message: "A test message",
-                from: "Holly"
+                message: `Tom, thank you for everything and best wishes for the future. I have really appreciated all your support and insight over the past few years. I think you know I have leaned on you for your tech expertise, but you might not realise how many times I've taken inspiration from you as a Dad. The kids are too young at the moment for me to bring some of this to life, but there have been a number of occasions I've thought "I wanna be like that with the kids" or "I wanna do that with Max in a few years". So thank you for being an unwitting mentor. You are smart, chilled and mindful of others. I've said it before but it hasn't been lost on me how much effort you make to ensure everybody is heard in meetings and not just the blow-hards like me. You're the man, and whatever the future holds, I have no doubt at all that you will roundhouse kick it in the face.`,
+                from: `Lewis`
             },
             {
-                message: "A second test message",
-                from: "Lauren"
-            },
-            {
-                message: "A final test message",
-                from: "Lewis"
-            },
-            {
-                message: "Wow, this is cool",
-                from: "Natalie"
-            },
-            {
-                message: "This is a really long message to show the variable wait time for the each message, it is roughly 50 milliseconds per character of the message, if it were any longer then it'd be boring and if it were shorter then you may not have time to read the whole thing!",
-                from: "Colin (again)"
+                message: `Salesforce was tough, but I think parenthood will be more messy. Please can you come round and support me with that please?!`,
+                from: `Holly`
             },
         ];
 
         const messageContainer = document.getElementById('message-container');
         const messages = document.querySelectorAll('.message');
+        let lastMessageLength = 0;
         let currentIndex = 0;
+        let timeoutID;
 
+
+        for (let i = messageTexts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = messageTexts[i];
+            messageTexts[i] = messageTexts[j];
+            messageTexts[j] = temp;
+        }
         messageTexts.forEach((message, index) => {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message' + (index === 0 ? ' active' : '');
@@ -95,28 +103,52 @@
             messageContainer.appendChild(messageDiv);
         });
 
+        function calculateWaitTime(charCount) {
+            return charCount <= 50 ? 3000 : Math.max(3000, charCount * 50);
+        }
+
+        function showPreviousMessage() {
+            const messages = document.querySelectorAll('.message');
+            messages[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex - 1 + messages.length) % messages.length;
+            messages[currentIndex].classList.add('active');
+            return messages[currentIndex].childNodes[0].nodeValue.trim();
+        }
+
         function showNextMessage() {
             const messages = document.querySelectorAll('.message');
             messages[currentIndex].classList.remove('active');
-
             currentIndex = (currentIndex + 1) % messages.length;
             messages[currentIndex].classList.add('active');
-
-            const messageText = messages[currentIndex].childNodes[0].nodeValue.trim();
-            const charCount = messageText.length;
-
-            // Adjust wait time based on message length
-            let waitTime;
-            if (charCount <= 50) {
-                waitTime = 3000; // Minimum 3 seconds for short messages
-            } else {
-                waitTime = Math.max(3000, charCount * 50);
-            }
-
-            setTimeout(showNextMessage, waitTime);
+            return messages[currentIndex].childNodes[0].nodeValue.trim();
         }
 
-        setTimeout(showNextMessage, 4000);
+        function autoShowNextMessage() {
+            const message = showNextMessage();
+            lastMessageLength = message.length;
+            timeoutID = setTimeout(autoShowNextMessage, calculateWaitTime(lastMessageLength));
+        }
+
+        function onPrevClick(el) {
+            showPreviousMessage()
+        }
+
+        function onPauseClick(el) {
+            if (el.src.indexOf('media/pause.svg') !== -1) {
+                el.src = 'media/play.svg';
+                clearTimeout(timeoutID);
+                isPaused = true;
+            } else {
+                autoShowNextMessage();
+                el.src = 'media/pause.svg';
+            }
+        }
+
+        function onNextClick(el) {
+            showNextMessage()
+        }
+
+        timeoutID = setTimeout(autoShowNextMessage, calculateWaitTime(messageTexts[0].message.length));
     </script>
 </body>
 
